@@ -388,6 +388,10 @@ fileprivate extension String {
         return Double(d) ?? 0
     }
     
+    var isNegative: Bool {
+//        self[self.startIndex] == "-"
+        self.contains("-")
+    }
     // args:
     // decimalPlaces - the max number of decimal places
     func currencyFormat(decimalPlaces: Int? = nil, currencySymbol: String? = nil) -> String? {
@@ -397,6 +401,9 @@ fileprivate extension String {
             return nil
         }
         
+        // Allow currency to be negative
+        let signed = double * (isNegative ? -1 : 1)
+      
         let formatter = Formatter.currency
         
         // if has fractions, show fractions
@@ -407,8 +414,8 @@ fileprivate extension String {
             formatter.minimumFractionDigits = min(fractionDigits, decimalPlaces != nil ? decimalPlaces! : 2)
             formatter.maximumFractionDigits = min(fractionDigits, decimalPlaces != nil ? decimalPlaces! : 2)
             
-            let formatted = formatter.string(from: NSNumber(value: double))
-            
+//            let formatted = formatter.string(from: NSNumber(value: double))
+            let formatted = formatter.string(from: NSNumber(value: signed))
             // show dot if exists
             if let formatted = formatted, fractionDigits == 0 {
                 return "\(formatted)" + (Locale.current.decimalSeparator ?? ".")
@@ -422,7 +429,8 @@ fileprivate extension String {
         }
         
         formatter.maximumFractionDigits = 0
-        let formatted = formatter.string(from: NSNumber(value: double))
+//        let formatted = formatter.string(from: NSNumber(value: double))
+        let formatted = formatter.string(from: NSNumber(value: signed))
         return formatted
     }
 }
