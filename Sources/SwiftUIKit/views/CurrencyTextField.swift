@@ -92,6 +92,19 @@ public struct CurrencyTextField: UIViewRepresentable {
         let textField = UITextField()
         textField.delegate = context.coordinator
         
+        // Calculate padding based on textAlignment
+        let padding: CGFloat = (textField.textAlignment == .right) ? 8.0 : 0.0
+        
+        // Create padding views
+        let leftPaddingView = UIView(frame: CGRect(x: 0, y: 0, width: padding, height: textField.frame.size.height))
+        let rightPaddingView = UIView(frame: CGRect(x: 0, y: 0, width: padding, height: textField.frame.size.height))
+        
+        // Assign padding views to leftView and rightView
+        textField.leftView = (textField.textAlignment == .right) ? nil : leftPaddingView
+        textField.leftViewMode = .always
+        textField.rightView = (textField.textAlignment == .right) ? rightPaddingView : nil
+        textField.rightViewMode = .always
+      
         textField.addTarget(context.coordinator, action: #selector(context.coordinator.textFieldEditingDidBegin(_:)), for: .editingDidBegin)
         textField.addTarget(context.coordinator, action: #selector(context.coordinator.textFieldEditingDidEnd(_:)), for: .editingDidEnd)
         
@@ -209,6 +222,7 @@ public struct CurrencyTextField: UIViewRepresentable {
     public class Coordinator: NSObject, UITextFieldDelegate {
         @Binding var value: Double?
         private var isResponder: Binding<Bool>?
+        var isNegative = false
         private var onReturn: ()->()
         private var alwaysShowFractions: Bool
         private var numberOfDecimalPlaces: Int
@@ -226,7 +240,6 @@ public struct CurrencyTextField: UIViewRepresentable {
              onReturn: @escaping () -> Void = {},
              onEditingChanged: @escaping (Bool) -> Void = { _ in }
         ) {
-            print("coordinator init")
             _value = value
             internalValue = value.wrappedValue
             self.isResponder = isResponder
@@ -304,7 +317,7 @@ public struct CurrencyTextField: UIViewRepresentable {
             }
             
             // limits integers length
-            if newValue.integers.count > 9 {
+            if newValue.integers.count > 12 {
                 return false
             }
             
